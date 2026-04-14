@@ -10,23 +10,32 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import type { StudyProgress } from "@/lib/study-engine";
+import { getWeightedPercentage, getBoxCounts } from "@/lib/study-engine";
 
 interface TopicCardProps {
   id: string;
   name: string;
-  totalQuestions: number;
-  masteredCount: number;
+  questionIds: string[];
+  progress: StudyProgress;
 }
 
 export function TopicCard({
   id,
   name,
-  totalQuestions,
-  masteredCount,
+  questionIds,
+  progress,
 }: TopicCardProps) {
-  const percentage =
-    totalQuestions > 0 ? Math.round((masteredCount / totalQuestions) * 100) : 0;
-  const isComplete = masteredCount === totalQuestions && totalQuestions > 0;
+  const totalQuestions = questionIds.length;
+  const percentage = getWeightedPercentage(questionIds, progress);
+  const { learning, reviewing, mastered } = getBoxCounts(questionIds, progress);
+  const isComplete = mastered === totalQuestions && totalQuestions > 0;
+
+  const segments: string[] = [];
+  if (mastered > 0) segments.push(`${mastered} mastered`);
+  if (reviewing > 0) segments.push(`${reviewing} reviewing`);
+  if (learning > 0 && (mastered > 0 || reviewing > 0))
+    segments.push(`${learning} left`);
 
   return (
     <Link href={`/study/${id}`} className="block">
@@ -38,7 +47,7 @@ export function TopicCard({
               <Badge>Mastered</Badge>
             ) : (
               <Badge variant="secondary">
-                {masteredCount}/{totalQuestions}
+                {percentage}%
               </Badge>
             )}
           </div>
@@ -49,7 +58,9 @@ export function TopicCard({
         <CardContent>
           <div className="flex flex-col gap-2">
             <Progress value={percentage} className="h-2" />
-            <p className="text-xs text-muted-foreground">{percentage}% mastered</p>
+            <p className="text-xs text-muted-foreground">
+              {segments.length > 0 ? segments.join(" · ") : "Not started"}
+            </p>
           </div>
         </CardContent>
       </Card>

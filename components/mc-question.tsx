@@ -3,17 +3,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { Question, BBoxRegion } from "@/lib/questions";
+import type { Question } from "@/lib/questions";
 import { buildChoices } from "@/lib/study-engine";
-import { ImageWithMasks } from "./image-with-masks";
 
 interface MCQuestionProps {
   question: Question;
-  bboxes: BBoxRegion[];
   onAnswer: (correct: boolean) => void;
 }
 
-export function MCQuestion({ question, bboxes, onAnswer }: MCQuestionProps) {
+export function MCQuestion({ question, onAnswer }: MCQuestionProps) {
   const [choices] = useState(() =>
     buildChoices(question.answer, question.distractors)
   );
@@ -55,15 +53,6 @@ export function MCQuestion({ question, bboxes, onAnswer }: MCQuestionProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      {question.type === "image-identify" && question.image && (
-        <ImageWithMasks
-          src={question.image}
-          bboxes={bboxes}
-          highlight={question.highlight}
-          showLabels={revealed}
-        />
-      )}
-
       <p className="text-lg font-medium">{question.question}</p>
 
       <div className="grid gap-3 sm:grid-cols-2">

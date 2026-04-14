@@ -2,13 +2,14 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import type { Question, ImageBBoxes } from "@/lib/questions";
+import type { Question } from "@/lib/questions";
 import type { StudyProgress } from "@/lib/study-engine";
 import {
   prepareRound,
   updateQuestionState,
   getUnmasteredQuestions,
   getMasteredCount,
+  getWeightedPercentage,
 } from "@/lib/study-engine";
 import { QuestionCard } from "./question-card";
 import { RoundSummary } from "./round-summary";
@@ -18,26 +19,17 @@ import { Button } from "@/components/ui/button";
 
 interface StudySessionProps {
   questions: Question[];
-  bboxData: ImageBBoxes;
   progress: StudyProgress;
   onUpdateProgress: (updater: (prev: StudyProgress) => StudyProgress) => void;
   title: string;
-  imageOnly: boolean;
-  onToggleImageOnly: () => void;
 }
 
 export function StudySession({
-  questions: allQuestions,
-  bboxData,
+  questions,
   progress,
   onUpdateProgress,
   title,
-  imageOnly,
-  onToggleImageOnly,
 }: StudySessionProps) {
-  const questions = imageOnly
-    ? allQuestions.filter((q) => q.type === "image-identify")
-    : allQuestions;
   const router = useRouter();
   const [round, setRound] = useState(1);
   const [roundQuestions, setRoundQuestions] = useState<Question[]>(() =>
@@ -52,18 +44,6 @@ export function StudySession({
   );
 
   const currentQuestion = roundQuestions[currentIndex];
-
-  useEffect(() => {
-    const newRound = prepareRound(questions, progress);
-    setRoundQuestions(newRound);
-    setCurrentIndex(0);
-    setRoundCorrect(0);
-    setRoundTotal(0);
-    setShowSummary(false);
-    setMasteredBeforeRound(getMasteredCount(questions, progress));
-    setRound(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [imageOnly]);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -112,10 +92,8 @@ export function StudySession({
   const allMastered = unmasteredCount === 0;
   const currentMastered = getMasteredCount(questions, progress);
   const newlyMastered = currentMastered - masteredBeforeRound;
-  const sessionProgress =
-    questions.length > 0
-      ? Math.round((currentMastered / questions.length) * 100)
-      : 0;
+  const questionIds = questions.map((q) => q.id);
+  const sessionProgress = getWeightedPercentage(questionIds, progress);
 
   if (showSummary) {
     return (
@@ -139,9 +117,6 @@ export function StudySession({
     );
   }
 
-  const questionBboxes =
-    currentQuestion.image ? bboxData[currentQuestion.image] ?? [] : [];
-
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -149,20 +124,10 @@ export function StudySession({
           <h2 className="font-heading text-lg font-medium">{title}</h2>
           <Badge variant="secondary">Round {round}</Badge>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant={imageOnly ? "default" : "outline"}
-            size="sm"
-            onClick={onToggleImageOnly}
-            title="Only show image-based questions"
-          >
-            🖼 Images only
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => router.push("/")}>
-            Quit
-            <span className="ml-1 text-xs text-muted-foreground">Esc</span>
-          </Button>
-        </div>
+        <Button variant="outline" size="sm" onClick={() => router.push("/")}>
+          Quit
+          <span className="ml-1 text-xs text-muted-foreground">Esc</span>
+        </Button>
       </div>
 
       <div className="flex items-center gap-3">
@@ -179,7 +144,6 @@ export function StudySession({
       <QuestionCard
         key={currentQuestion.id + "-" + round}
         question={currentQuestion}
-        bboxes={questionBboxes}
         progress={progress}
         onAnswer={handleAnswer}
       />

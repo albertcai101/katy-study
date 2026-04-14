@@ -1,23 +1,17 @@
 "use client";
 
-import type { Question, ImageBBoxes } from "@/lib/questions";
+import type { Question } from "@/lib/questions";
 import { useProgress } from "@/lib/use-progress";
-import { useImageOnly } from "@/lib/use-image-only";
 import { getWeightedReviewQuestions } from "@/lib/study-engine";
 import { StudySession } from "@/components/study-session";
 import { useMemo } from "react";
 
 interface ReviewPageClientProps {
   questions: Question[];
-  bboxData: ImageBBoxes;
 }
 
-export function ReviewPageClient({
-  questions,
-  bboxData,
-}: ReviewPageClientProps) {
+export function ReviewPageClient({ questions }: ReviewPageClientProps) {
   const { progress, loaded, updateProgress } = useProgress();
-  const { imageOnly, toggle } = useImageOnly();
 
   const reviewQuestions = useMemo(() => {
     if (!loaded) return [];
@@ -47,12 +41,9 @@ export function ReviewPageClient({
     <div className="mx-auto w-full max-w-2xl px-4 py-8">
       <StudySession
         questions={reviewQuestions}
-        bboxData={bboxData}
         progress={progress}
         onUpdateProgress={updateProgress}
         title="Review All"
-        imageOnly={imageOnly}
-        onToggleImageOnly={toggle}
       />
     </div>
   );

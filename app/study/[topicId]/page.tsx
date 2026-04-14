@@ -1,4 +1,4 @@
-import { getQuestionData, getImageBBoxes } from "@/lib/questions";
+import { getQuestionData } from "@/lib/questions";
 import { notFound } from "next/navigation";
 import { StudyPageClient } from "./client";
 
@@ -18,7 +18,5 @@ export default async function StudyPage({
 
   if (!topic) notFound();
 
-  const bboxData = getImageBBoxes();
-
-  return <StudyPageClient topic={topic} bboxData={bboxData} />;
+  return <StudyPageClient topic={topic} />;
 }

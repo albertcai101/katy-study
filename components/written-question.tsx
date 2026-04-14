@@ -4,21 +4,15 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import type { Question, BBoxRegion } from "@/lib/questions";
+import type { Question } from "@/lib/questions";
 import { fuzzyMatch } from "@/lib/fuzzy-match";
-import { ImageWithMasks } from "./image-with-masks";
 
 interface WrittenQuestionProps {
   question: Question;
-  bboxes: BBoxRegion[];
   onAnswer: (correct: boolean) => void;
 }
 
-export function WrittenQuestion({
-  question,
-  bboxes,
-  onAnswer,
-}: WrittenQuestionProps) {
+export function WrittenQuestion({ question, onAnswer }: WrittenQuestionProps) {
   const [input, setInput] = useState("");
   const [revealed, setRevealed] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -53,15 +47,6 @@ export function WrittenQuestion({
 
   return (
     <div className="flex flex-col gap-6">
-      {question.type === "image-identify" && question.image && (
-        <ImageWithMasks
-          src={question.image}
-          bboxes={bboxes}
-          highlight={question.highlight}
-          showLabels={revealed}
-        />
-      )}
-
       <p className="text-lg font-medium">{question.question}</p>
 
       <form

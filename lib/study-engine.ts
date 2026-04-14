@@ -90,6 +90,36 @@ export function getTopicProgress(
   };
 }
 
+const BOX_WEIGHT: Record<Box, number> = { 1: 0, 2: 0.5, 3: 1 };
+
+export function getWeightedPercentage(
+  questionIds: string[],
+  progress: StudyProgress
+): number {
+  if (questionIds.length === 0) return 0;
+  const sum = questionIds.reduce((acc, id) => {
+    const box = (progress.questions[id]?.box ?? 1) as Box;
+    return acc + BOX_WEIGHT[box];
+  }, 0);
+  return Math.round((sum / questionIds.length) * 100);
+}
+
+export function getBoxCounts(
+  questionIds: string[],
+  progress: StudyProgress
+): { learning: number; reviewing: number; mastered: number } {
+  let learning = 0;
+  let reviewing = 0;
+  let mastered = 0;
+  for (const id of questionIds) {
+    const box = progress.questions[id]?.box ?? 1;
+    if (box >= 3) mastered++;
+    else if (box === 2) reviewing++;
+    else learning++;
+  }
+  return { learning, reviewing, mastered };
+}
+
 export function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {

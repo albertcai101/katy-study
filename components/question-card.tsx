@@ -1,6 +1,6 @@
 "use client";
 
-import type { Question, BBoxRegion } from "@/lib/questions";
+import type { Question } from "@/lib/questions";
 import type { StudyProgress } from "@/lib/study-engine";
 import { getQuestionMode } from "@/lib/study-engine";
 import { MCQuestion } from "./mc-question";
@@ -8,14 +8,12 @@ import { WrittenQuestion } from "./written-question";
 
 interface QuestionCardProps {
   question: Question;
-  bboxes: BBoxRegion[];
   progress: StudyProgress;
   onAnswer: (correct: boolean) => void;
 }
 
 export function QuestionCard({
   question,
-  bboxes,
   progress,
   onAnswer,
 }: QuestionCardProps) {
@@ -26,7 +24,6 @@ export function QuestionCard({
       <WrittenQuestion
         key={question.id}
         question={question}
-        bboxes={bboxes}
         onAnswer={onAnswer}
       />
     );
@@ -36,7 +33,6 @@ export function QuestionCard({
     <MCQuestion
       key={question.id}
       question={question}
-      bboxes={bboxes}
       onAnswer={onAnswer}
     />
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useProgress } from "@/lib/use-progress";
+import { getWeightedPercentage, getBoxCounts } from "@/lib/study-engine";
 import { TopicCard } from "@/components/topic-card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -32,15 +33,10 @@ export function HomeClient({ topics }: HomeClientProps) {
     );
   }
 
-  const totalQuestions = topics.reduce((s, t) => s + t.questionCount, 0);
-  const totalMastered = topics.reduce((s, t) => {
-    return (
-      s +
-      t.questionIds.filter((id) => progress.questions[id]?.box >= 3).length
-    );
-  }, 0);
-  const overallPercentage =
-    totalQuestions > 0 ? Math.round((totalMastered / totalQuestions) * 100) : 0;
+  const allQuestionIds = topics.flatMap((t) => t.questionIds);
+  const totalQuestions = allQuestionIds.length;
+  const { mastered: totalMastered } = getBoxCounts(allQuestionIds, progress);
+  const overallPercentage = getWeightedPercentage(allQuestionIds, progress);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
@@ -78,20 +74,15 @@ export function HomeClient({ topics }: HomeClientProps) {
       <Separator className="mb-6" />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {topics.map((topic) => {
-          const mastered = topic.questionIds.filter(
-            (id) => progress.questions[id]?.box >= 3
-          ).length;
-          return (
-            <TopicCard
-              key={topic.id}
-              id={topic.id}
-              name={topic.name}
-              totalQuestions={topic.questionCount}
-              masteredCount={mastered}
-            />
-          );
-        })}
+        {topics.map((topic) => (
+          <TopicCard
+            key={topic.id}
+            id={topic.id}
+            name={topic.name}
+            questionIds={topic.questionIds}
+            progress={progress}
+          />
+        ))}
       </div>
 
       <Separator className="my-6" />

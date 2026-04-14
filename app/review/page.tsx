@@ -1,10 +1,9 @@
-import { getQuestionData, getImageBBoxes } from "@/lib/questions";
+import { getQuestionData } from "@/lib/questions";
 import { ReviewPageClient } from "./client";
 
 export default function ReviewPage() {
   const data = getQuestionData();
   const allQuestions = data.topics.flatMap((t) => t.questions);
-  const bboxData = getImageBBoxes();
 
-  return <ReviewPageClient questions={allQuestions} bboxData={bboxData} />;
+  return <ReviewPageClient questions={allQuestions} />;
 }

@@ -1,18 +1,15 @@
 "use client";
 
-import type { Topic, ImageBBoxes } from "@/lib/questions";
+import type { Topic } from "@/lib/questions";
 import { useProgress } from "@/lib/use-progress";
-import { useImageOnly } from "@/lib/use-image-only";
 import { StudySession } from "@/components/study-session";
 
 interface StudyPageClientProps {
   topic: Topic;
-  bboxData: ImageBBoxes;
 }
 
-export function StudyPageClient({ topic, bboxData }: StudyPageClientProps) {
+export function StudyPageClient({ topic }: StudyPageClientProps) {
   const { progress, loaded, updateProgress } = useProgress();
-  const { imageOnly, toggle } = useImageOnly();
 
   if (!loaded) {
     return (
@@ -26,12 +23,9 @@ export function StudyPageClient({ topic, bboxData }: StudyPageClientProps) {
     <div className="mx-auto w-full max-w-2xl px-4 py-8">
       <StudySession
         questions={topic.questions}
-        bboxData={bboxData}
         progress={progress}
         onUpdateProgress={updateProgress}
         title={topic.name}
-        imageOnly={imageOnly}
-        onToggleImageOnly={toggle}
       />
     </div>
   );
